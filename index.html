@@ -231,6 +231,63 @@ body[data-lang="ar"] .venue-name{direction:rtl}
   color: var(--gold-ink);
   font-style: italic;
 }
+
+
+/* Wedding wishes */
+.wishes-box {
+  max-width: 620px;
+  margin: auto;
+  padding: clamp(22px, 5vw, 40px);
+  background: var(--pearl);
+  border: 1px solid rgba(198,166,107,.8);
+  box-shadow: 0 20px 40px -22px rgba(69,55,40,.35);
+}
+.wishes-form {
+  display: grid;
+  gap: 14px;
+  text-align: start;
+}
+.wishes-form label {
+  color: var(--gold-ink);
+  font-size: 1rem;
+}
+.wishes-form input,
+.wishes-form textarea {
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  color: var(--brown);
+  background: var(--ivory);
+  border: 1px solid var(--gold);
+}
+.wishes-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.wishes-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+  text-align: start;
+}
+.wish-card {
+  padding: 18px;
+  background: var(--ivory);
+  border: 1px solid rgba(198,166,107,.55);
+  overflow-wrap: anywhere;
+}
+.wish-card p { margin: 5px 0; }
+.wish-name {
+  color: var(--gold-ink);
+  font-weight: 700;
+}
+.wish-status {
+  text-align: center;
+  color: var(--gold-ink);
+  font-size: .95rem;
+  min-height: 1.5em;
+}
+
    
 /* rsvp */
 .rsvp-box{max-width:560px;margin-inline:auto;background:var(--pearl) var(--grain);border:1px solid rgba(198,166,107,.8);padding:clamp(24px,6vw,52px);box-shadow:0 26px 50px -24px rgba(69,55,40,.4),inset 0 0 0 6px var(--pearl),inset 0 0 0 7px rgba(198,166,107,.35);text-align:start}
@@ -467,6 +524,59 @@ main{position:relative;z-index:2}
     </div>
   </section>
 
+
+<!-- Wedding Wishes -->
+<section id="wishes">
+  <div class="sec-head">
+    <h2>WEDDING WISHES</h2>
+    <div class="orn" aria-hidden="true">
+      <i></i><b></b><i></i>
+    </div>
+    <p class="memories-caption">
+      كلمات من القلب ❤️
+      <br>
+      اتركوا لعمرو وإسراء رسالة حب ودعوة جميلة
+    </p>
+  </div>
+
+  <div class="wishes-box">
+    <form id="wishesForm" class="wishes-form">
+      <div>
+        <label for="wishName">اسمك</label>
+        <input id="wishName" type="text"
+          maxlength="40" required
+          placeholder="اكتب اسمك">
+      </div>
+
+      <div>
+        <label for="wishMessage">مباركتك للعروسين</label>
+        <textarea id="wishMessage"
+          maxlength="300" required
+          placeholder="اكتب رسالتك لعمرو وإسراء..."></textarea>
+      </div>
+
+      <button class="btn solid" type="submit">
+        إرسال المباركة ❤️
+      </button>
+      <p id="wishStatus" class="wish-status"
+        role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="orn" aria-hidden="true">
+      <i></i><b></b><i></i>
+    </div>
+
+    <h3 style="text-align:center;color:var(--gold-ink)">
+      أجمل المباركات
+    </h3>
+    <div id="wishesList" class="wishes-list"
+      aria-live="polite">
+      جاري تحميل المباركات...
+    </div>
+  </div>
+</section>
+
+   
   <!-- Thank-you -->
   <section class="final" id="thanks">
     <div class="orn" aria-hidden="true"><i></i><b></b><i></i></div>
@@ -478,6 +588,9 @@ main{position:relative;z-index:2}
 
 <audio id="bgm" preload="auto" autoplay loop></audio>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+   
 <script>
 /* =====================================================================
    EDIT HERE. Everything the guests see comes from this block.
@@ -792,6 +905,93 @@ if(!reduce){
   let ticking=false;
   addEventListener("scroll",()=>{ if(ticking) return; ticking=true; requestAnimationFrame(()=>{ const y=scrollY; document.querySelectorAll(".card .bloom").forEach((b,i)=>{ b.style.translate=`0 ${(i?-1:1)*Math.min(y,900)*.05}px`; }); ticking=false; }); },{passive:true});
 }
+   
+// Firebase wedding wishes
+const firebaseConfig = {
+  apiKey: "AIzaSyAIvFoeH0zncg5U_Y4u_A5wcn1R3whilbc",
+  authDomain: "amr-esraa-wishes.firebaseapp.com",
+  databaseURL: "https://amr-esraa-wishes-default-rtdb.firebaseio.com",
+  projectId: "amr-esraa-wishes",
+  storageBucket: "amr-esraa-wishes.firebasestorage.app",
+  messagingSenderId: "155394584773",
+  appId: "1:155394584773:web:cb1ef39452a2b661b400ac",
+  measurementId: "G-5S396CRGW0"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const wishesDB = firebase.database().ref("wishes");
+const wishesForm = document.getElementById("wishesForm");
+const wishesList = document.getElementById("wishesList");
+const wishStatus = document.getElementById("wishStatus");
+
+wishesDB.orderByChild("createdAt").limitToLast(50)
+.on("value", snapshot => {
+  wishesList.replaceChildren();
+
+  if (!snapshot.exists()) {
+    wishesList.textContent = "كونوا أول من يترك مباركة للعروسين ❤️";
+    return;
+  }
+
+  const wishes = [];
+  snapshot.forEach(child => {
+    wishes.push(child.val());
+  });
+
+  wishes.reverse().forEach(wish => {
+    const card = document.createElement("div");
+    card.className = "wish-card";
+
+    const name = document.createElement("p");
+    name.className = "wish-name";
+    name.textContent = "❤️ " + wish.name;
+
+    const message = document.createElement("p");
+    message.textContent = wish.message;
+
+    card.append(name, message);
+    wishesList.appendChild(card);
+  });
+}, error => {
+  wishesList.textContent = "تعذر تحميل المباركات حاليًا.";
+  console.error(error);
+});
+
+wishesForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const name = document.getElementById("wishName").value.trim();
+  const message = document.getElementById("wishMessage").value.trim();
+  const button = wishesForm.querySelector('button[type="submit"]');
+
+  if (!name || !message || name.length > 40 || message.length > 300) {
+    wishStatus.textContent = "من فضلك راجعي الاسم والرسالة.";
+    return;
+  }
+
+  button.disabled = true;
+  wishStatus.textContent = "جاري إرسال مباركتك...";
+
+  try {
+    await wishesDB.push({
+      name: name,
+      message: message,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    wishesForm.reset();
+    wishStatus.textContent = "وصلت مباركتك بنجاح ❤️ شكرًا لك!";
+  } catch (error) {
+    console.error(error);
+    wishStatus.textContent = "لم يتم الإرسال. حاولي مرة أخرى.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
 setupAudio();
 applyLang(lang);
 // Attempt the wedding song immediately; browsers that block audible autoplay will retry on envelope tap.
