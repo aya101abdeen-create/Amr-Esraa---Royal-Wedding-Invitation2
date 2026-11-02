@@ -566,8 +566,14 @@ main{position:relative;z-index:2}
       <i></i><b></b><i></i>
     </div>
 
-    <h3 style="text-align:center;color:var(--gold-ink)">
-      أجمل المباركات
+   <h3 style="text-align:center;color:var(--gold-ink)">
+  أجمل المباركات
+</h3>
+
+<p id="wishesCount"
+   style="text-align:center;color:var(--gold-ink)">
+  وصلتنا 0 مباركة من أحبابنا ❤️
+</p>
     </h3>
     <div id="wishesList" class="wishes-list"
       aria-live="polite">
@@ -576,6 +582,12 @@ main{position:relative;z-index:2}
   </div>
 </section>
 
+<p style="text-align:center;color:var(--gold-ink);
+font-style:italic;margin-top:30px">
+  Thank you for being part of our story.
+  <br>
+  شكرًا لأنكم جزء من حكايتنا ❤️
+</p>
    
   <!-- Thank-you -->
   <section class="final" id="thanks">
@@ -927,8 +939,11 @@ const wishesForm = document.getElementById("wishesForm");
 const wishesList = document.getElementById("wishesList");
 const wishStatus = document.getElementById("wishStatus");
 
-wishesDB.orderByChild("createdAt").limitToLast(50)
-.on("value", snapshot => {
+wishesDB.orderByChild("createdAt")
+   .on("value", snapshot => {
+      document.getElementById("wishesCount").textContent =
+  "وصلتنا " + snapshot.numChildren() +
+  " مباركة من أحبابنا ❤️";
   wishesList.replaceChildren();
 
   if (!snapshot.exists()) {
