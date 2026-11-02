@@ -337,6 +337,121 @@ main{position:relative;z-index:2}
   .sway{animation:none}
 }
 @media(max-width:420px){.btn{padding-inline:1.2rem;letter-spacing:.18em}.corner{opacity:.8}.card::before{inset:16px}}
+   
+/* Royal Secret Love Letter */
+.love-letter-section {
+  text-align: center;
+  padding: 55px 20px;
+}
+
+.letter-envelope {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 360px);
+  min-height: 210px;
+  margin: 25px auto;
+  padding: 35px 20px;
+  border: 1px solid rgba(198,166,107,.9);
+  border-radius: 5px;
+  background:
+    linear-gradient(145deg, #fffdf7, #eee2ca);
+  box-shadow:
+    0 15px 35px rgba(75,55,30,.16),
+    inset 0 0 25px rgba(198,166,107,.12);
+  color: var(--gold-ink);
+  cursor: pointer;
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+
+.letter-envelope:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(75,55,30,.22);
+}
+
+.envelope-heart {
+  display: grid;
+  place-items: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #d9bd83, #a98242);
+  color: white;
+  font-size: 25px;
+  box-shadow: 0 4px 12px rgba(120,85,35,.25);
+}
+
+.envelope-text {
+  font-family: Georgia, serif;
+  font-size: 19px;
+  letter-spacing: 1px;
+}
+
+.envelope-hint {
+  font-size: 13px;
+  opacity: .75;
+}
+
+.love-letter-message {
+  width: min(100%, 540px);
+  margin: 30px auto;
+  animation: letterReveal .9s ease both;
+}
+
+.love-letter-message[hidden] {
+  display: none;
+}
+
+.letter-inner {
+  padding: clamp(25px, 6vw, 45px);
+  background: #fffdf7;
+  border: 1px solid #c6a66b;
+  outline: 1px solid rgba(198,166,107,.4);
+  outline-offset: -8px;
+  box-shadow: 0 15px 40px rgba(75,55,30,.12);
+  color: #65513a;
+  line-height: 1.9;
+}
+
+.letter-ornament {
+  color: #b89556;
+  font-size: 25px;
+  margin: 8px;
+}
+
+.letter-dear {
+  font-family: Georgia, serif;
+  font-size: 19px;
+  color: var(--gold-ink);
+}
+
+.letter-arabic {
+  margin-top: 22px;
+  font-size: 17px;
+  line-height: 2;
+}
+
+.letter-signature {
+  margin-top: 25px;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--gold-ink);
+}
+
+@keyframes letterReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 </style>
 
 </head>
@@ -513,6 +628,46 @@ main{position:relative;z-index:2}
       </div>
     </div>
   </section>
+
+   
+<!-- SECRET LOVE LETTER -->
+<section id="love-letter" class="love-letter-section">
+  <div class="sec-head">
+    <h2>A LITTLE LOVE LETTER</h2>
+    <div class="orn" aria-hidden="true">
+      <i></i><b></b><i></i>
+    </div>
+    <p class="memories-caption">
+      رسالة صغيرة من عمرو وإسراء إلى أحبابهما ❤️
+    </p>
+  </div>
+
+  <button type="button" class="letter-envelope"
+          id="openLoveLetter"
+          aria-expanded="false"
+          aria-controls="loveLetterMessage">
+    <span class="envelope-heart">♥</span>
+    <span class="envelope-text">A special message for you</span>
+    <span class="envelope-hint">اضغط لفتح الرسالة</span>
+  </button>
+
+  <div id="loveLetterMessage" class="love-letter-message" hidden>
+    <div class="letter-inner">
+      <div class="letter-ornament">♥</div>
+      <p class="letter-dear">To our dearest family and friends,</p>
+      <p>
+        Your presence is the most beautiful gift we could ever receive.
+        We can't wait to celebrate this unforgettable moment with you.
+      </p>
+      <p class="letter-arabic">
+        وجودكم بجانبنا هو أجمل هدية، وفرحتنا لا تكتمل إلا بمشاركتكم
+        لحظاتنا السعيدة. نتطلع للاحتفال معكم وصنع ذكريات لا تُنسى.
+      </p>
+      <p class="letter-signature">With love, Amr &amp; Esraa</p>
+      <div class="letter-ornament">♥</div>
+    </div>
+  </div>
+</section>
 
 
 <!-- Wedding Wishes -->
@@ -1004,6 +1159,27 @@ wishesForm.addEventListener("submit", async event => {
     wishStatus.textContent = "لم يتم الإرسال. حاولي مرة أخرى.";
   } finally {
     button.disabled = false;
+  }
+});
+
+// Open and close the secret love letter
+const letterButton = document.getElementById("openLoveLetter");
+const letterMessage = document.getElementById("loveLetterMessage");
+
+letterButton.addEventListener("click", () => {
+  const isOpening = letterMessage.hidden;
+
+  letterMessage.hidden = !isOpening;
+  letterButton.setAttribute("aria-expanded", String(isOpening));
+
+  letterButton.querySelector(".envelope-hint").textContent =
+    isOpening ? "اضغط لإغلاق الرسالة" : "اضغط لفتح الرسالة";
+
+  if (isOpening) {
+    letterMessage.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
   }
 });
 
