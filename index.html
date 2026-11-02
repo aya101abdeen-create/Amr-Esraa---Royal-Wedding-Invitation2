@@ -602,7 +602,7 @@ font-style:italic;margin-top:30px">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-   
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>   
 <script>
 /* =====================================================================
    EDIT HERE. Everything the guests see comes from this block.
@@ -933,6 +933,16 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
+
+// Activate Firebase App Check with reCAPTCHA Enterprise
+const appCheck = firebase.appCheck();
+
+appCheck.activate(
+  new firebase.appCheck.ReCaptchaEnterpriseProvider(
+    "6LeL6AwuAAAAAEuobinCPHF3UKLw06LyPhKCrw7o"
+  ),
+  true
+);
 
 const wishesDB = firebase.database().ref("wishes");
 const wishesForm = document.getElementById("wishesForm");
